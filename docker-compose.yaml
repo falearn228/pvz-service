@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  pvz-service:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: pvz-service
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    env_file:
+      - app.config.env
+    environment:
+      DATABASE_URL: "postgresql://root:password@db:5432/pvz?sslmode=disable"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - internal
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+  
+  db:
+    image: postgres:15-alpine
+    container_name: postgres-pvz-15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: root
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: pvz
+    volumes:
+      - postgres:/var/lib/postgresql/data
+      - ./migrations:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U root -d pvz"]
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 10s
+    networks:
+      - internal
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  postgres:
+  influxdb:
