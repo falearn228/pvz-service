@@ -13,6 +13,12 @@ import (
 	"github.com/google/uuid"
 )
 
+// PVZQueriesInterface определяет интерфейс для запросов к ПВЗ
+type PVZQueriesInterface interface {
+	CreatePVZ(ctx context.Context, city string) (*models.PVZ, error)
+	GetPVZList(ctx context.Context, params models.PVZListQuery) ([]models.PVZ, int, error)
+}
+
 // PVZQueries содержит методы запросов для работы с ПВЗ
 type PVZQueries struct {
 	db *db.Database

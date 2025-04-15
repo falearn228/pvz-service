@@ -14,6 +14,7 @@ import (
 func SetupRouter(config *config.Config, db *db.Database) *gin.Engine {
 	// Создаем экземпляр Gin
 	router := gin.Default()
+	router.RemoveExtraSlash = true
 
 	// Создаем менеджер JWT
 	jwtManager := utils.NewJWTManager(&config.JWT)

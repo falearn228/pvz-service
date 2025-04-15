@@ -10,7 +10,7 @@ import (
 )
 
 // AuthMiddleware создает middleware для проверки JWT токена
-func AuthMiddleware(jwtManager *utils.JWTManager) gin.HandlerFunc {
+func AuthMiddleware(jwtManager utils.JWTManagerInterface) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Получаем токен из заголовка Authorization
 		authHeader := c.GetHeader("Authorization")

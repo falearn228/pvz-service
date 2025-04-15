@@ -13,13 +13,13 @@ import (
 
 // PVZHandler содержит обработчики для работы с ПВЗ
 type PVZHandler struct {
-	pvzQueries       *queries.PVZQueries
-	receptionQueries *queries.ReceptionQueries // Add this field
-	productQueries   *queries.ProductQueries   // Add this field
+	pvzQueries       queries.PVZQueriesInterface
+	receptionQueries queries.ReceptionQueriesInterface
+	productQueries   queries.ProductQueriesInterface
 }
 
 // NewPVZHandler создает новый экземпляр PVZHandler
-func NewPVZHandler(pvzQueries *queries.PVZQueries, receptionQueries *queries.ReceptionQueries, productQueries *queries.ProductQueries) *PVZHandler {
+func NewPVZHandler(pvzQueries queries.PVZQueriesInterface, receptionQueries queries.ReceptionQueriesInterface, productQueries queries.ProductQueriesInterface) *PVZHandler {
 	return &PVZHandler{
 		pvzQueries:       pvzQueries,
 		receptionQueries: receptionQueries,
@@ -35,6 +35,14 @@ func (h *PVZHandler) CreatePVZ(c *gin.Context) {
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, models.ErrorResponse{
 			Message: "Неверный запрос: " + err.Error(),
+		})
+		return
+	}
+
+	userRole, _ := c.Get("userRole")
+	if userRole != "moderator" {
+		c.JSON(http.StatusForbidden, models.ErrorResponse{
+			Message: "Доступ запрещен: только модераторы могут создавать ПВЗ",
 		})
 		return
 	}
@@ -112,7 +120,7 @@ func (h *PVZHandler) GetPVZList(c *gin.Context) {
 			for _, product := range products {
 				productResponses = append(productResponses, models.ProductResponse{
 					ID:          product.ID,
-					DateTime:    product.ReceptionDatetime,
+					DateTime:    product.Datetime,
 					Type:        product.Type,
 					ReceptionID: product.ReceptionID,
 				})

@@ -15,7 +15,11 @@ import (
 
 // ReceptionQueriesInterface определяет интерфейс для запросов к приёмкам
 type ReceptionQueriesInterface interface {
+	CheckOpenReception(ctx context.Context, pvzID string) (bool, error)
+	CreateReception(ctx context.Context, pvzID string) (*models.Reception, error)
 	GetLastOpenReception(ctx context.Context, pvzID string) (*models.Reception, error)
+	CloseReception(ctx context.Context, receptionID string) (*models.Reception, error)
+	GetReceptionsByPVZ(ctx context.Context, pvzID string) ([]models.Reception, error)
 }
 
 // ReceptionQueries содержит методы запросов для работы с приёмками

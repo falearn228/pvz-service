@@ -52,7 +52,7 @@ func LoadConfig() *Config {
 			SSLMode:  getEnv("DB_SSLMODE", "disable"),
 		},
 		JWT: JWTConfig{
-			Secret:     getEnv("JWT_SECRET", "your-secret-key"),
+			Secret:     getEnv("JWT_SECRET", "secret-key"),
 			ExpireTime: time.Hour * 24,
 		},
 	}

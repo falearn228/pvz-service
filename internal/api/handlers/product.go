@@ -11,12 +11,12 @@ import (
 
 // ProductHandler содержит обработчики для работы с товарами
 type ProductHandler struct {
-	productQueries   *queries.ProductQueries
-	receptionQueries *queries.ReceptionQueries
+	productQueries   queries.ProductQueriesInterface
+	receptionQueries queries.ReceptionQueriesInterface
 }
 
 // NewProductHandler создает новый экземпляр ProductHandler
-func NewProductHandler(productQueries *queries.ProductQueries, receptionQueries *queries.ReceptionQueries) *ProductHandler {
+func NewProductHandler(productQueries queries.ProductQueriesInterface, receptionQueries queries.ReceptionQueriesInterface) *ProductHandler {
 	return &ProductHandler{
 		productQueries:   productQueries,
 		receptionQueries: receptionQueries,
@@ -73,7 +73,7 @@ func (h *ProductHandler) AddProduct(c *gin.Context) {
 	// Возвращаем данные добавленного товара
 	c.JSON(http.StatusCreated, models.ProductResponse{
 		ID:          product.ID,
-		DateTime:    product.ReceptionDatetime,
+		DateTime:    product.Datetime,
 		Type:        product.Type,
 		ReceptionID: product.ReceptionID,
 	})

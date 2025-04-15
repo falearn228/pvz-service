@@ -11,11 +11,11 @@ import (
 
 // ReceptionHandler содержит обработчики для работы с приёмками товаров
 type ReceptionHandler struct {
-	receptionQueries *queries.ReceptionQueries
+	receptionQueries queries.ReceptionQueriesInterface
 }
 
 // NewReceptionHandler создает новый экземпляр ReceptionHandler
-func NewReceptionHandler(receptionQueries *queries.ReceptionQueries) *ReceptionHandler {
+func NewReceptionHandler(receptionQueries queries.ReceptionQueriesInterface) *ReceptionHandler {
 	return &ReceptionHandler{
 		receptionQueries: receptionQueries,
 	}
