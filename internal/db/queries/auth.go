@@ -2,10 +2,9 @@ package queries
 
 import (
 	"context"
-	sqlPackage "database/sql"
+	"database/sql"
 	"fmt"
 	"pvz-service/internal/db"
-	"pvz-service/internal/models"
 
 	"github.com/Masterminds/squirrel"
 )
@@ -25,11 +24,11 @@ func NewAuthQueries(db *db.Database) *AuthQueries {
 }
 
 // CreateUser создает нового пользователя
-func (q *AuthQueries) CreateUser(ctx context.Context, user *models.User) (string, error) {
+func (q *AuthQueries) CreateUser(ctx context.Context, email, passwordHash, role string) (string, error) {
 	query := q.sq.
 		Insert("users").
-		Columns("email", "role", "password").
-		Values(user.Email, user.Role, user.Password).
+		Columns("email", "password_hash", "role", "created_at").
+		Values(email, passwordHash, role, squirrel.Expr("CURRENT_TIMESTAMP")).
 		Suffix("RETURNING id")
 
 	sql, args, err := query.ToSql()
@@ -54,15 +53,15 @@ func (q *AuthQueries) GetUserByEmail(ctx context.Context, email string) (bool, e
 		Where(squirrel.Eq{"email": email}).
 		Limit(1)
 
-	sql, args, err := query.ToSql()
+	qsql, args, err := query.ToSql()
 	if err != nil {
 		return false, fmt.Errorf("failed to build query: %w", err)
 	}
 
 	var exists int
-	err = q.db.QueryRowContext(ctx, sql, args...).Scan(&exists)
+	err = q.db.QueryRowContext(ctx, qsql, args...).Scan(&exists)
 	if err != nil {
-		if err == sqlPackage.ErrNoRows {
+		if err == sql.ErrNoRows {
 			return false, nil
 		}
 		return false, fmt.Errorf("failed to check user existence: %w", err)

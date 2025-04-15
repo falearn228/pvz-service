@@ -1,9 +1,8 @@
--- migration_up.sql
 BEGIN;
 
 -- Создание таблицы ПВЗ
 CREATE TABLE pvz (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     name VARCHAR(200) NOT NULL,
     city VARCHAR(100) NOT NULL,
     address TEXT NOT NULL,
@@ -28,10 +27,10 @@ CREATE INDEX idx_users_email ON users(email);
 
 -- Создание таблицы приёмки товара
 CREATE TABLE reception (
-    id SERIAL PRIMARY KEY,
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     datetime TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    pvz_id INTEGER NOT NULL REFERENCES pvz(id),
-    moderator_id INTEGER REFERENCES users(id),
+    pvz_id UUID NOT NULL REFERENCES pvz(id),
+    moderator_id UUID REFERENCES users(id),
     status VARCHAR(20) NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress', 'close')),
     comment TEXT,
     close_datetime TIMESTAMP,
@@ -44,8 +43,8 @@ CREATE INDEX idx_reception_moderator_id ON reception(moderator_id);
 
 -- Создание таблицы товаров
 CREATE TABLE product (
-    id SERIAL PRIMARY KEY,
-    reception_id INTEGER NOT NULL REFERENCES reception(id),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    reception_id UUID NOT NULL REFERENCES reception(id),
     reception_datetime TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     type VARCHAR(20) NOT NULL CHECK (type IN ('electronics', 'clothes', 'shoes')),
     name VARCHAR(200) NOT NULL,
@@ -62,9 +61,9 @@ CREATE INDEX idx_product_barcode ON product(barcode);
 
 -- Создание связующей таблицы пользователей и ПВЗ
 CREATE TABLE user_pvz (
-    id SERIAL PRIMARY KEY,
-    user_id INTEGER NOT NULL REFERENCES users(id),
-    pvz_id INTEGER NOT NULL REFERENCES pvz(id),
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL REFERENCES users(id),
+    pvz_id UUID NOT NULL REFERENCES pvz(id),
     role VARCHAR(20) NOT NULL CHECK (role IN ('manager', 'employee', 'moderator')),
     assigned_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     status VARCHAR(20) DEFAULT 'active' CHECK (status IN ('active', 'inactive')),
