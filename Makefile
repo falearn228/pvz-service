@@ -13,34 +13,8 @@ migratedown:
 test:
 	go test -cover ./...
 server:
-	go run main.go
-mock:
-	mockgen -package mockdb -destination internal/mock/store.go pvz-service/internal/db/sqlc Store
-####################################################################################################################################	
-# Подготовка линтера
-lint-prepare:
-	@which golangci-lint || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.54.2
-
-# Проверка кода линтером
-lint: lint-prepare
-	golangci-lint run ./... --timeout=5m
-
-# Исправление проблем линтером
-lint-fix: lint-prepare
-	golangci-lint run --fix ./...
-
-# Проверка с выводом в JSON
-lint-json: lint-prepare
-	golangci-lint run ./... --out-format=json > lint-report.json
-
-# Быстрая проверка только критических линтеров
-lint-fast: lint-prepare
-	golangci-lint run ./... --fast --disable-all -E errcheck,gosimple,govet
-
-# Проверка с подробным выводом
-lint-verbose: lint-prepare
-	golangci-lint run ./... -v --timeout=5m	
-####################################################################################################################################	
+	go run cmd/server/main.go
+####################################################################################################################################		
 # Сборка образов
 build:
 	docker-compose build
@@ -70,4 +44,4 @@ clean:
 restart-service:
 	docker-compose restart $(service)
 ####################################################################################################################################
-.PHONY: postgres start createdb dropdb migrateup migratedown sqlc test server mock lint lint-fix lint-check load-test load-test-auth load-test-purchase load-test-transfer build up down logs ps clean
+.PHONY: postgres start createdb dropdb migrateup migratedown sqlc test server build up down logs ps clean
