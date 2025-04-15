@@ -2,45 +2,77 @@ package middleware
 
 import (
 	"net/http"
-	"pvz-service/internal/token"
+	"pvz-service/internal/models"
+	"pvz-service/internal/utils"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-const (
-	authorizationHeaderKey  = "authorization"
-	authorizationTypeBearer = "bearer"
-)
-
-func AuthMiddleware(tokenMaker token.Maker) gin.HandlerFunc {
+// AuthMiddleware создает middleware для проверки JWT токена
+func AuthMiddleware(jwtManager *utils.JWTManager) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		authorizationHeader := c.GetHeader(authorizationHeaderKey)
-		if len(authorizationHeader) == 0 {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "authorization header is not provided"})
+		// Получаем токен из заголовка Authorization
+		authHeader := c.GetHeader("Authorization")
+		if authHeader == "" {
+			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Message: "Отсутствует токен авторизации",
+			})
+			c.Abort()
 			return
 		}
 
-		fields := strings.Fields(authorizationHeader)
-		if len(fields) < 2 {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid authorization header format"})
+		// Извлекаем токен из заголовка
+		tokenParts := strings.Split(authHeader, " ")
+		if len(tokenParts) != 2 || tokenParts[0] != "Bearer" {
+			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Message: "Неверный формат токена",
+			})
+			c.Abort()
 			return
 		}
+		tokenString := tokenParts[1]
 
-		authorizationType := strings.ToLower(fields[0])
-		if authorizationType != authorizationTypeBearer {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "unsupported authorization type"})
-			return
-		}
-
-		accessToken := fields[1]
-		payload, err := tokenMaker.VerifyToken(accessToken)
+		// Проверяем токен
+		claims, err := jwtManager.ValidateToken(tokenString)
 		if err != nil {
-			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Message: "Неверный токен: " + err.Error(),
+			})
+			c.Abort()
 			return
 		}
 
-		c.Set("username", payload.Username)
+		// Сохраняем данные пользователя в контексте
+		c.Set("userID", claims.UserID)
+		c.Set("userRole", claims.Role)
+
+		c.Next()
+	}
+}
+
+// RequireRole создает middleware для проверки роли пользователя
+func RequireRole(requiredRole string) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		// Получаем роль пользователя из контекста
+		userRole, exists := c.Get("userRole")
+		if !exists {
+			c.JSON(http.StatusUnauthorized, models.ErrorResponse{
+				Message: "Нет данных о пользователе",
+			})
+			c.Abort()
+			return
+		}
+
+		// Проверяем соответствие роли
+		if userRole != requiredRole {
+			c.JSON(http.StatusForbidden, models.ErrorResponse{
+				Message: "Доступ запрещен: недостаточно прав",
+			})
+			c.Abort()
+			return
+		}
+
 		c.Next()
 	}
 }

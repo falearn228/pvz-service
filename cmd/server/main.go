@@ -36,7 +36,7 @@ func main() {
 		WriteTimeout: cfg.Server.WriteTimeout,
 	}
 
-	// Запускаем сервер в отдельной горутине
+	// Запускаем сервер в отдельной горутине, чтобы не блокировать main-горутину
 	go func() {
 		log.Printf("Server is starting on port %s", cfg.Server.Port)
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {

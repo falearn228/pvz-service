@@ -10,6 +10,13 @@ import (
 	"github.com/google/uuid"
 )
 
+// JWTManagerInterface определяет интерфейс для JWT операций
+type JWTManagerInterface interface {
+	GenerateDummyToken(role string) (string, error)
+	GenerateToken(userID, role string) (string, error)
+	ValidateToken(tokenString string) (*CustomClaims, error)
+}
+
 // JWTManager управляет созданием и проверкой JWT токенов
 type JWTManager struct {
 	secretKey  string
@@ -54,6 +61,31 @@ func (manager *JWTManager) GenerateDummyToken(role string) (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
 	// Подписываем токен нашим секретным ключом
+	tokenString, err := token.SignedString([]byte(manager.secretKey))
+
+	return tokenString, err
+}
+
+// GenerateToken создает JWT-токен для авторизованного пользователя
+func (manager *JWTManager) GenerateToken(userID, role string) (string, error) {
+	// Устанавливаем время истечения токена
+	expirationTime := time.Now().Add(manager.expireTime)
+
+	// Создаем claims
+	claims := &CustomClaims{
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: expirationTime.Unix(),
+			IssuedAt:  time.Now().Unix(),
+			Subject:   userID,
+		},
+		UserID: userID,
+		Role:   role,
+	}
+
+	// Создаем токен с claims
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	// Подписываем токен секретным ключом
 	tokenString, err := token.SignedString([]byte(manager.secretKey))
 
 	return tokenString, err

@@ -5,9 +5,17 @@ import (
 	"database/sql"
 	"fmt"
 	"pvz-service/internal/db"
+	"pvz-service/internal/models"
 
 	"github.com/Masterminds/squirrel"
 )
+
+// AuthQueriesInterface определяет интерфейс для запросов, связанных с аутентификацией
+type AuthQueriesInterface interface {
+	GetUserByEmail(ctx context.Context, email string) (bool, error)
+	CreateUser(ctx context.Context, email, passwordHash, role string) (string, error)
+	GetUserWithCredentials(ctx context.Context, email string) (*models.User, error)
+}
 
 // AuthQueries содержит методы запросов для авторизации
 type AuthQueries struct {
@@ -68,4 +76,26 @@ func (q *AuthQueries) GetUserByEmail(ctx context.Context, email string) (bool, e
 	}
 
 	return true, nil
+}
+
+// GetUserWithCredentials получает пользователя по email вместе с хешем пароля
+func (q *AuthQueries) GetUserWithCredentials(ctx context.Context, email string) (*models.User, error) {
+	query := q.sq.
+		Select("id", "email", "role", "password_hash").
+		From("users").
+		Where(squirrel.Eq{"email": email}).
+		Limit(1)
+
+	sql, args, err := query.ToSql()
+	if err != nil {
+		return nil, fmt.Errorf("failed to build query: %w", err)
+	}
+
+	var user models.User
+	err = q.db.GetContext(ctx, &user, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get user: %w", err)
+	}
+
+	return &user, nil
 }
