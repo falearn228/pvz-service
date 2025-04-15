@@ -13,6 +13,11 @@ import (
 	"github.com/google/uuid"
 )
 
+// ReceptionQueriesInterface определяет интерфейс для запросов к приёмкам
+type ReceptionQueriesInterface interface {
+	GetLastOpenReception(ctx context.Context, pvzID string) (*models.Reception, error)
+}
+
 // ReceptionQueries содержит методы запросов для работы с приёмками
 type ReceptionQueries struct {
 	db *db.Database

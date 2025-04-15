@@ -14,6 +14,15 @@ import (
 	"github.com/google/uuid"
 )
 
+// internal/db/queries/product.go
+
+// ProductQueriesInterface определяет интерфейс для запросов к товарам
+type ProductQueriesInterface interface {
+	AddProduct(ctx context.Context, receptionID, productType string) (*models.Product, error)
+	GetLastProductFromReception(ctx context.Context, receptionID string) (*models.Product, error)
+	DeleteProduct(ctx context.Context, productID string) error
+}
+
 // ProductQueries содержит методы запросов для работы с товарами
 type ProductQueries struct {
 	db *db.Database
