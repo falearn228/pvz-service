@@ -17,7 +17,7 @@ A plants vs zombies... oh, more precisely pvz service for create,delete products
 
 `cmd/server` - основной файл сервиса
 
-Реализованы юнит-тесты для SQLC кода, API бизнес логики.
+Реализованы юнит-тесты для API бизнес логики.
 
 ## Требования
 

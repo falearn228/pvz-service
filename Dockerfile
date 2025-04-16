@@ -23,7 +23,7 @@ WORKDIR /app
 
 # Копируем собранное приложение
 COPY --from=builder /app/main .
-COPY app.config.env .
+COPY .env .
 COPY migrations ./migrations
 
 # Создаем непривилегированного пользователя

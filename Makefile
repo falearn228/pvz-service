@@ -7,9 +7,9 @@ createdb:
 dropdb:
 	docker exec -it postgres dropdb pvz
 migrateup:
-	migrate -path migrations -database "postgresql://root:password@localhost:5432/pvz?sslmode=disable" -verbose up
+	migrate -path migrations -database "postgresql://root:password@db:5432/pvz?sslmode=disable" -verbose up
 migratedown:
-	migrate -path migrations -database "postgresql://root:password@localhost:5432/pvz?sslmode=disable" -verbose down
+	migrate -path migrations -database "postgresql://root:password@db:5432/pvz?sslmode=disable" -verbose down
 test:
 	go test -cover ./...
 server:
