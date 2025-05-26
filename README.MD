@@ -4,7 +4,7 @@ A plants vs zombies... oh, more precisely pvz service for create,delete products
 
 ## Основные моменты
 
-Используемые технологии -> Docker, Docker-compose, PostgreSQL, Golang (squirrel, testify, Gin)
+Используемые технологии -> Docker, Docker-compose, PostgreSQL, Golang (squirrel (заместо ORM или SQLC), testify, Gin)
 
 `migrations` - файл с миграциями для БД \
 `internal` - внутренний код проекта
@@ -55,8 +55,6 @@ make down
 ```
 
 4. Использование **API**:
-
-Конечно! Вот полный список CURL-запросов для всех реализованных вами API-эндпоинтов, соответствующих вашей Swagger-документации и текущей реализации.
 
 ---
 
@@ -174,9 +172,6 @@ curl -X POST http://localhost:8080/pvz//delete_last_product \
 ---
 
 ## Примечания
-
-- `, `, ``— JWT-токен, полученный через`/dummyLogin`или`/login`
-- `` — UUID ПВЗ, полученный при создании или из списка ПВЗ
 - Все защищённые эндпоинты требуют заголовок `Authorization: Bearer `
 
 ---
